@@ -1,67 +1,103 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 const CutorBulk = () => {
-  // const [age, setAge] = useState('');
-  // const [gender, setGender] = useState('');
-  // const [height, setHeight] = useState('');
-  // const [weight, setWeight] = useState('');
-  // const [goal, setGoal] = useState('');
-  // const [decision, setDecision] = useState('');
-  // const [calories, setCalories] = useState('');
-  // const [fats, setFats] = useState('');
-  // const [protein, setProtein] = useState('');
-  // const [carbs, setCarbs] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [goal, setGoal] = useState('');
+  const [decision, setDecision] = useState('');
+  const [calories, setCalories] = useState('');
+  const [fats, setFats] = useState('');
+  const [protein, setProtein] = useState('');
+  const [carbs, setCarbs] = useState('');
+  const [activityLevel, setActivityLevel] = useState('');
+  const [proteinIntakeOption, setProteinIntakeOption] = useState('1gPerPound');
 
-  // const calculateNutrition = () => {
-  //   if (age && gender && height && weight && goal) {
-  //     const bmi = (weight / ((height / 100) * (height / 100))).toFixed(1);
+  // Function to get the activity level multiplier
+  const getActivityLevelMultiplier = () => {
+    switch (activityLevel) {
+      case 'sedentary':
+        return 1.2;
+      case 'lightlyActive':
+        return 1.375;
+      case 'moderatelyActive':
+        return 1.55;
+      case 'veryActive':
+        return 1.725;
+      case 'extremelyActive':
+        return 1.9;
+      default:
+        return 1.2; // Default to sedentary
+    }
+  };
 
-  //     let calorieFactor = 0;
-  //     let proteinFactor = 0;
-  //     let fatFactor = 0;
-  //     let carbFactor = 0;
+  // Function to calculate the protein factor
+  const getProteinFactor = () => {
+    switch (proteinIntakeOption) {
+      case '1gPerPound':
+        return 1.0;
+      case '0.82gPerPound':
+        return 0.82;
+      case '1.5gPerPound':
+        return 1.5;
+      default:
+        return 1.0; // Default to 1g per pound
+    }
+  };
 
-  //     if (goal === 'cut') {
-  //       calorieFactor = 0.8; // Reducing calorie intake for weight loss
-  //       proteinFactor = 2.2; // Higher protein intake for weight loss
-  //       fatFactor = 0.25; // Moderate fat intake
-  //       carbFactor = 0.45; // Lower carbohydrate intake
-  //     } else if (goal === 'bulk') {
-  //       calorieFactor = 1.2; // Increasing calorie intake for bulking up
-  //       proteinFactor = 1.8; // Moderate protein intake
-  //       fatFactor = 0.3; // Moderate fat intake
-  //       carbFactor = 0.55; // Higher carbohydrate intake for bulking
-  //     }
-
-  //     // Calculate calorie intake
-  //     const bmr = gender === 'male' ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age) : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-  //     const tdee = bmr * calorieFactor;
-  //     const dailyCalories = tdee;
-
-  //     // Calculate protein intake
-  //     const dailyProtein = weight * proteinFactor;
-
-  //     // Calculate fat intake
-  //     const dailyFat = (dailyCalories * fatFactor) / 9;
-
-  //     // Calculate carbohydrate intake
-  //     const dailyCarbs = (dailyCalories * carbFactor) / 4;
-
-  //     setCalories(dailyCalories.toFixed(0));
-  //     setProtein(dailyProtein.toFixed(0));
-  //     setFats(dailyFat.toFixed(0));
-  //     setCarbs(dailyCarbs.toFixed(0));
-
-  //     if (bmi < 18.5) {
-  //       setDecision('Cut Down Weight');
-  //     } else if (bmi < 24.9) {
-  //       setDecision('Maintain');
-  //     } else {
-  //       setDecision('Bulk Up');
-  //     }
-  //   }
-  // };
+  const calculateNutrition = () => {
+    if (age && gender && height && weight && goal) {
+      const heightInInches = height / 2.54; // Convert height to inches
+      const weightInPounds = parseFloat(weight) * 2.20462; // Convert weight to pounds
+  
+      const bmi = (weightInPounds / (heightInInches * heightInInches)).toFixed(1);
+  
+      // Calculate BMR based on gender
+      const bmr =
+        gender === 'male'
+          ? 88.362 + 13.397 * weightInPounds + 4.799 * heightInInches - 5.677 * age
+          : 447.593 + 9.247 * weightInPounds + 3.098 * heightInInches - 4.33 * age;
+  
+      // Calculate TDEE using the activity level multiplier
+      const activityLevelMultiplier = getActivityLevelMultiplier();
+      const tdee = bmr * activityLevelMultiplier;
+  
+      // Adjust calories based on the selected goal
+      const calorieFactor = goal === 'cut' ? 0.8 : 1.2;
+      const dailyCalories = tdee * calorieFactor * 0.9; // Reduce calories by 10%
+  
+      // Calculate protein intake using the selected protein factor
+      const proteinFactor = getProteinFactor();
+      const dailyProtein = weightInPounds * proteinFactor;
+  
+      // Calculate fat intake
+      const fatFactor = 0.25;
+      const dailyFat = (dailyCalories * fatFactor) / 9; // 1g of fat = 9 calories
+  
+      // Calculate carbohydrate intake
+      const carbFactor = 1 - proteinFactor - fatFactor;
+      const dailyCarbs = (dailyCalories * carbFactor) / 4; // 1g of carbs = 4 calories
+  
+      // Update state variables with the calculated values
+      setCalories(dailyCalories.toFixed(0));
+      setProtein(dailyProtein.toFixed(0));
+      setFats(dailyFat.toFixed(0));
+      setCarbs(dailyCarbs.toFixed(0));
+  
+      // Determine decision based on BMI
+      if (bmi < 18.5) {
+        setDecision('Cut Down Weight');
+      } else if (bmi < 24.9) {
+        setDecision('Maintain');
+      } else {
+        setDecision('Bulk Up');
+      }
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -72,10 +108,14 @@ const CutorBulk = () => {
         keyboardType="numeric"
       />
       <Text>Gender:</Text>
-      <TextInput
-        value={gender}
-        onChangeText={(text) => setGender(text)}
-      />
+      <Picker
+        selectedValue={gender}
+        onValueChange={(itemValue) => setGender(itemValue)}
+      >
+        <Picker.Item label="Select Gender" value="" />
+        <Picker.Item label="Male" value="male" />
+        <Picker.Item label="Female" value="female" />
+      </Picker>
       <Text>Height (cm):</Text>
       <TextInput
         value={height}
@@ -88,11 +128,36 @@ const CutorBulk = () => {
         onChangeText={(text) => setWeight(text)}
         keyboardType="numeric"
       />
-      <Text>Goal (bulk or cut):</Text>
-      <TextInput
-        value={goal}
-        onChangeText={(text) => setGoal(text.toLowerCase())}
-      />
+      <Text>Goal:</Text>
+      <Picker
+        selectedValue={goal}
+        onValueChange={(itemValue) => setGoal(itemValue)}
+      >
+        <Picker.Item label="Select Goal" value="" />
+        <Picker.Item label="Cut" value="cut" />
+        <Picker.Item label="Bulk" value="bulk" />
+      </Picker>
+      <Text>Activity Level:</Text>
+      <Picker
+        selectedValue={activityLevel}
+        onValueChange={(itemValue) => setActivityLevel(itemValue)}
+      >
+        <Picker.Item label="Select Activity Level" value="" />
+        <Picker.Item label="Sedentary" value="sedentary" />
+        <Picker.Item label="Lightly Active" value="lightlyActive" />
+        <Picker.Item label="Moderately Active" value="moderatelyActive" />
+        <Picker.Item label="Very Active" value="veryActive" />
+        <Picker.Item label="Extremely Active" value="extremelyActive" />
+      </Picker>
+      <Text>Protein Intake Option:</Text>
+      <Picker
+        selectedValue={proteinIntakeOption}
+        onValueChange={(itemValue) => setProteinIntakeOption(itemValue)}
+      >
+        <Picker.Item label="1g per pound" value="1gPerPound" />
+        <Picker.Item label="0.82g per pound" value="0.82gPerPound" />
+        <Picker.Item label="1.5g per pound" value="1.5gPerPound" />
+      </Picker>
       <Button title="Calculate Nutrition" onPress={calculateNutrition} />
       <Text style={styles.decision}>{decision}</Text>
       <Text style={styles.nutrition}>
