@@ -5,7 +5,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import WorkOut from './WorkOut';
 import CutorBulk from './CutorBulk';
 import FoodLog from './FoodLog';
-import { Image } from 'react-native';
+import AboutPage from './AboutPage';
+import ProgressPage from './ProgressPage';
+import { Image }from 'react-native';
 
 
 
@@ -18,6 +20,8 @@ const Navigation = () => {
         <Stack.Screen name="WorkOut" component={WorkOut}/>
         <Stack.Screen name="CutorBulk" component={CutorBulk} />
         <Stack.Screen name="FoodLog" component={FoodLog}/>
+        <Stack.Screen name ="ProgressPage" component={ProgressPage}/>
+        <Stack.Screen name="AboutPage" component={AboutPage}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -44,6 +48,14 @@ const Main = ({ navigation }) => {
         <CustomButton
           title="FoodLog"
           onPress={() => navigation.navigate('FoodLog')}
+        />
+        <CustomButton
+          title="Progress"
+          onPress={() => navigation.navigate('ProgressPage')}
+        />
+         <CustomButton
+          title="AboutPage"
+          onPress={() => navigation.navigate('AboutPage')}
         />
       </View>
     );
